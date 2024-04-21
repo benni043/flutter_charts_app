@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 
-import '../utility/Room.dart';
+import '../utility/room.dart';
 
 class RoomProvider extends ChangeNotifier {
 

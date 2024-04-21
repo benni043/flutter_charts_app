@@ -5,7 +5,7 @@ import 'package:http/http.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/urlProvider.dart';
-import '../utility/Room.dart';
+import '../utility/room.dart';
 
 class SelectRoom extends StatefulWidget {
   final Function function;
@@ -57,6 +57,7 @@ class _SelectRoomState extends State<SelectRoom> {
           controller: schoolController,
           requestFocusOnTap: true,
           label: const Text("Schule"),
+          width: 150,
           onSelected: (String? school) async {
             branchController.clear();
             roomController.clear();
@@ -88,6 +89,7 @@ class _SelectRoomState extends State<SelectRoom> {
             controller: branchController,
             requestFocusOnTap: true,
             label: const Text("Abteilung"),
+            width: 150,
             onSelected: (String? branch) async {
               roomController.clear();
 
@@ -115,6 +117,7 @@ class _SelectRoomState extends State<SelectRoom> {
             controller: roomController,
             requestFocusOnTap: true,
             label: const Text("Raum"),
+            width: 150,
             onSelected: (String? room) {
               selectedRoom = room;
 

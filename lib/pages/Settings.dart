@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../providers/roomProvider.dart';
 import '../providers/urlProvider.dart';
-import '../utility/Room.dart';
+import '../utility/room.dart';
 import '../widgets/selectRoom.dart';
 
 class Settings extends StatefulWidget {
@@ -59,16 +59,16 @@ class _SettingsState extends State<Settings> {
                 ),
               ],
             ),
+            SelectRoom(
+              function: setFavRoom,
+            ),
             Row(
               children: [
-                SelectRoom(
-                  function: setFavRoom,
-                ),
-                Text("momentan: "),
+                const Text("Derzeitiger Standardraum: "),
                 if (roomProvider.favouriteRooms != null)
                   RoomDisplay(room: roomProvider.favouriteRooms!)
                 else
-                  Text("keiner")
+                  const Text("keiner")
               ],
             )
           ],

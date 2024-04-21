@@ -4,7 +4,7 @@ import 'package:flutter_charts_app/widgets/selectRoom.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/roomProvider.dart';
-import '../utility/Room.dart';
+import '../utility/room.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});

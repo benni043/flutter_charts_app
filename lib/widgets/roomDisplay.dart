@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../utility/Room.dart';
+import '../utility/room.dart';
 
 class RoomDisplay extends StatelessWidget {
   final Room room;
