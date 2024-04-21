@@ -3,6 +3,7 @@ import 'package:flutter_charts_app/widgets/selectRoom.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/roomProvider.dart';
+import '../utility/Room.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -12,9 +13,8 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  String favSchool = "";
-  String favBranch = "";
-  String favRoom = "";
+
+  List<Room> rooms = [];
 
   @override
   Widget build(BuildContext context) {
@@ -32,23 +32,20 @@ class _HomeState extends State<Home> {
       ]),
       body: Column(
         children: [
-          if (roomProvider.favouriteSchool != "" &&
-              roomProvider.favouriteBranch != "" &&
-              roomProvider.favouriteRoom != "")
           SelectRoom(
             function: setRoomData,
-            selectedSchool: roomProvider.favouriteSchool,
-            selectedBranch: roomProvider.favouriteBranch,
-            selectedRoom: roomProvider.favouriteRoom,
-          )
+            clear: true,
+          ),
+
+          for (var room in rooms) Text("${room.school} ${room.branch} ${room.room}")
         ],
       ),
     );
   }
 
-  setRoomData(String school, String branch, String room) {
-    favSchool = school;
-    favBranch = branch;
-    favRoom = room;
+  setRoomData(Room room) {
+    rooms.add(room);
+
+    setState(() {});
   }
 }

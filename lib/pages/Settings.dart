@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../providers/roomProvider.dart';
 import '../providers/urlProvider.dart';
+import '../utility/Room.dart';
 import '../widgets/selectRoom.dart';
 
 class Settings extends StatefulWidget {
@@ -14,10 +15,6 @@ class Settings extends StatefulWidget {
 
 class _SettingsState extends State<Settings> {
   final TextEditingController _urlController = TextEditingController();
-
-  String favSchool = "";
-  String favBranch = "";
-  String favRoom = "";
 
   @override
   Widget build(BuildContext context) {
@@ -43,20 +40,12 @@ class _SettingsState extends State<Settings> {
             ),
             SelectRoom(
               function: setFavRoom,
-              selectedSchool: roomProvider.favouriteSchool,
-              selectedBranch: roomProvider.favouriteBranch,
-              selectedRoom: roomProvider.favouriteRoom,
+              clear: false,
+              room: roomProvider.room,
             ),
             TextButton(
               onPressed: () {
                 urlProvider.url = _urlController.text;
-
-                RoomProvider roomProvider =
-                    Provider.of<RoomProvider>(context, listen: false);
-
-                roomProvider.favouriteSchool = favSchool;
-                roomProvider.favouriteBranch = favBranch;
-                roomProvider.favouriteRoom = favRoom;
 
                 Navigator.pop(context);
               },
@@ -73,9 +62,10 @@ class _SettingsState extends State<Settings> {
         ));
   }
 
-  setFavRoom(String school, String branch, String room) {
-    favSchool = school;
-    favBranch = branch;
-    favRoom = room;
+  setFavRoom(Room room) {
+    RoomProvider roomProvider =
+    Provider.of<RoomProvider>(context, listen: false);
+
+    roomProvider.room = room;
   }
 }

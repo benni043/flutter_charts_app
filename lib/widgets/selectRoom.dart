@@ -5,19 +5,18 @@ import 'package:http/http.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/urlProvider.dart';
+import '../utility/Room.dart';
 
 class SelectRoom extends StatefulWidget {
   final Function function;
-  final String? selectedSchool;
-  final String? selectedBranch;
-  final String? selectedRoom;
+  final Room? room;
+  final bool clear;
 
   const SelectRoom({
     super.key,
     required this.function,
-    this.selectedSchool,
-    this.selectedBranch,
-    this.selectedRoom,
+    this.room,
+    required this.clear
   });
 
   @override
@@ -41,13 +40,15 @@ class _SelectRoomState extends State<SelectRoom> {
   void initState() {
     super.initState();
 
-    if (widget.selectedSchool != null &&
-        widget.selectedBranch != null &&
-        widget.selectedRoom != null) {
-      fetchAll();
-    } else {
-      fetchSchools();
-    }
+    // if (widget.room!.school.isNotEmpty &&
+    //     widget.room!.branch.isNotEmpty &&
+    //     widget.room!.room.isNotEmpty) {
+    //   fetchAll();
+    // } else {
+    //   fetchSchools();
+    // }
+
+    fetchSchools();
   }
 
   fetchSchools() async {
@@ -58,13 +59,13 @@ class _SelectRoomState extends State<SelectRoom> {
 
   fetchAll() async {
     schools = await getSchools(context);
-    branches = await getBranches(context, widget.selectedSchool!);
+    branches = await getBranches(context, widget.room!.school);
     rooms =
-        await getRooms(context, widget.selectedSchool!, widget.selectedBranch!);
+        await getRooms(context, widget.room!.school, widget.room!.branch);
 
-    selectedSchool = widget.selectedSchool;
-    selectedBranch = widget.selectedBranch;
-    selectedRoom = widget.selectedRoom;
+    selectedSchool = widget.room!.school;
+    selectedBranch = widget.room!.branch;
+    selectedRoom = widget.room!.room;
 
     setState(() {});
   }
@@ -140,8 +141,6 @@ class _SelectRoomState extends State<SelectRoom> {
             onSelected: (String? room) {
               selectedRoom = room;
 
-              widget.function(selectedSchool, selectedBranch, selectedRoom);
-
               setState(() {});
             },
             dropdownMenuEntries:
@@ -153,7 +152,33 @@ class _SelectRoomState extends State<SelectRoom> {
             }).toList(),
           ),
         ),
+      TextButton(
+        onPressed: () {
+          if (widget.clear) clear();
+
+          widget.function(Room(selectedSchool!, selectedBranch!, selectedRoom!));
+        },
+        style: TextButton.styleFrom(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8.0),
+            side: const BorderSide(color: Colors.black),
+          ),
+        ),
+        child:
+        const Text("OK", style: TextStyle(color: Colors.black)),
+      ),
     ]);
+  }
+
+  clear() {
+    branchController.clear();
+    roomController.clear();
+
+    branches.clear();
+    rooms.clear();
+
+    selectedBranch = "";
+    selectedRoom = "";
   }
 
   getSchools(BuildContext context) async {
