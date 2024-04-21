@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_charts_app/utility/sensorData.dart';
 import 'package:flutter_charts_app/widgets/roomDisplay.dart';
 import 'package:flutter_charts_app/widgets/selectRoom.dart';
 import 'package:provider/provider.dart';
+import 'package:syncfusion_flutter_charts/charts.dart';
 
 import '../providers/roomProvider.dart';
 import '../utility/room.dart';
