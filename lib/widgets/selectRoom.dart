@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_charts_app/providers/roomProvider.dart';
 import 'package:http/http.dart';
 import 'package:provider/provider.dart';
 
@@ -9,15 +8,23 @@ import '../providers/urlProvider.dart';
 
 class SelectRoom extends StatefulWidget {
   final Function function;
+  final String? selectedSchool;
+  final String? selectedBranch;
+  final String? selectedRoom;
 
-  const SelectRoom({super.key, required this.function});
+  const SelectRoom({
+    super.key,
+    required this.function,
+    this.selectedSchool,
+    this.selectedBranch,
+    this.selectedRoom,
+  });
 
   @override
   State<SelectRoom> createState() => _SelectRoomState();
 }
 
 class _SelectRoomState extends State<SelectRoom> {
-
   final TextEditingController schoolController = TextEditingController();
   final TextEditingController branchController = TextEditingController();
   final TextEditingController roomController = TextEditingController();
@@ -34,15 +41,32 @@ class _SelectRoomState extends State<SelectRoom> {
   void initState() {
     super.initState();
 
-    fetchSchools();
+    if (widget.selectedSchool != null &&
+        widget.selectedBranch != null &&
+        widget.selectedRoom != null) {
+      fetchAll();
+    } else {
+      fetchSchools();
+    }
   }
 
   fetchSchools() async {
     schools = await getSchools(context);
 
-    setState(() {
+    setState(() {});
+  }
 
-    });
+  fetchAll() async {
+    schools = await getSchools(context);
+    branches = await getBranches(context, widget.selectedSchool!);
+    rooms =
+        await getRooms(context, widget.selectedSchool!, widget.selectedBranch!);
+
+    selectedSchool = widget.selectedSchool;
+    selectedBranch = widget.selectedBranch;
+    selectedRoom = widget.selectedRoom;
+
+    setState(() {});
   }
 
   @override
@@ -70,7 +94,7 @@ class _SelectRoomState extends State<SelectRoom> {
             setState(() {});
           },
           dropdownMenuEntries:
-          schools.map<DropdownMenuEntry<String>>((String school) {
+              schools.map<DropdownMenuEntry<String>>((String school) {
             return DropdownMenuEntry<String>(
               value: school,
               label: school,
@@ -97,7 +121,7 @@ class _SelectRoomState extends State<SelectRoom> {
               setState(() {});
             },
             dropdownMenuEntries:
-            branches.map<DropdownMenuEntry<String>>((String branch) {
+                branches.map<DropdownMenuEntry<String>>((String branch) {
               return DropdownMenuEntry<String>(
                 value: branch,
                 label: branch,
@@ -116,12 +140,12 @@ class _SelectRoomState extends State<SelectRoom> {
             onSelected: (String? room) {
               selectedRoom = room;
 
-              widget.function(selectedRoom);
+              widget.function(selectedSchool, selectedBranch, selectedRoom);
 
               setState(() {});
             },
             dropdownMenuEntries:
-            rooms.map<DropdownMenuEntry<String>>((String room) {
+                rooms.map<DropdownMenuEntry<String>>((String room) {
               return DropdownMenuEntry<String>(
                 value: room,
                 label: room,

@@ -15,12 +15,17 @@ class Settings extends StatefulWidget {
 class _SettingsState extends State<Settings> {
   final TextEditingController _urlController = TextEditingController();
 
+  String favSchool = "";
+  String favBranch = "";
   String favRoom = "";
 
   @override
   Widget build(BuildContext context) {
     UrlProvider urlProvider = Provider.of<UrlProvider>(context, listen: false);
     _urlController.text = urlProvider.url;
+
+    RoomProvider roomProvider =
+    Provider.of<RoomProvider>(context, listen: false);
 
     return Scaffold(
         appBar: AppBar(title: const Text("Einstellungen")),
@@ -36,14 +41,21 @@ class _SettingsState extends State<Settings> {
                         labelText: "Datenbank URL")),
               ),
             ),
-            SelectRoom(function: setFavRoom),
+            SelectRoom(
+              function: setFavRoom,
+              selectedSchool: roomProvider.favouriteSchool,
+              selectedBranch: roomProvider.favouriteBranch,
+              selectedRoom: roomProvider.favouriteRoom,
+            ),
             TextButton(
               onPressed: () {
                 urlProvider.url = _urlController.text;
 
                 RoomProvider roomProvider =
-                Provider.of<RoomProvider>(context, listen: false);
+                    Provider.of<RoomProvider>(context, listen: false);
 
+                roomProvider.favouriteSchool = favSchool;
+                roomProvider.favouriteBranch = favBranch;
                 roomProvider.favouriteRoom = favRoom;
 
                 Navigator.pop(context);
@@ -61,7 +73,9 @@ class _SettingsState extends State<Settings> {
         ));
   }
 
-  setFavRoom(String room) {
+  setFavRoom(String school, String branch, String room) {
+    favSchool = school;
+    favBranch = branch;
     favRoom = room;
   }
 }
