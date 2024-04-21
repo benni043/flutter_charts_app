@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_charts_app/widgets/roomDisplay.dart';
 import 'package:flutter_charts_app/widgets/selectRoom.dart';
 import 'package:provider/provider.dart';
 
@@ -13,9 +14,6 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-
-  List<Room> rooms = [];
-
   @override
   Widget build(BuildContext context) {
     RoomProvider roomProvider =
@@ -34,17 +32,28 @@ class _HomeState extends State<Home> {
         children: [
           SelectRoom(
             function: setRoomData,
-            clear: true,
           ),
-
-          for (var room in rooms) Text("${room.school} ${room.branch} ${room.room}")
+          for (var room in roomProvider.currentRooms)
+            RoomDisplay(room: room, remove: remove)
         ],
       ),
     );
   }
 
   setRoomData(Room room) {
-    rooms.add(room);
+    RoomProvider roomProvider =
+        Provider.of<RoomProvider>(context, listen: false);
+
+    roomProvider.currentRooms.add(room);
+
+    setState(() {});
+  }
+
+  remove(Room room) {
+    RoomProvider roomProvider =
+        Provider.of<RoomProvider>(context, listen: false);
+
+    roomProvider.currentRooms.remove(room);
 
     setState(() {});
   }

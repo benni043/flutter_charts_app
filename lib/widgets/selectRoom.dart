@@ -10,13 +10,11 @@ import '../utility/Room.dart';
 class SelectRoom extends StatefulWidget {
   final Function function;
   final Room? room;
-  final bool clear;
 
   const SelectRoom({
     super.key,
     required this.function,
     this.room,
-    required this.clear
   });
 
   @override
@@ -40,32 +38,11 @@ class _SelectRoomState extends State<SelectRoom> {
   void initState() {
     super.initState();
 
-    // if (widget.room!.school.isNotEmpty &&
-    //     widget.room!.branch.isNotEmpty &&
-    //     widget.room!.room.isNotEmpty) {
-    //   fetchAll();
-    // } else {
-    //   fetchSchools();
-    // }
-
     fetchSchools();
   }
 
   fetchSchools() async {
     schools = await getSchools(context);
-
-    setState(() {});
-  }
-
-  fetchAll() async {
-    schools = await getSchools(context);
-    branches = await getBranches(context, widget.room!.school);
-    rooms =
-        await getRooms(context, widget.room!.school, widget.room!.branch);
-
-    selectedSchool = widget.room!.school;
-    selectedBranch = widget.room!.branch;
-    selectedRoom = widget.room!.room;
 
     setState(() {});
   }
@@ -154,9 +131,9 @@ class _SelectRoomState extends State<SelectRoom> {
         ),
       TextButton(
         onPressed: () {
-          if (widget.clear) clear();
-
           widget.function(Room(selectedSchool!, selectedBranch!, selectedRoom!));
+
+          reset();
         },
         style: TextButton.styleFrom(
           shape: RoundedRectangleBorder(
@@ -165,20 +142,25 @@ class _SelectRoomState extends State<SelectRoom> {
           ),
         ),
         child:
-        const Text("OK", style: TextStyle(color: Colors.black)),
+        const Text("Hinzufügen", style: TextStyle(color: Colors.black)),
       ),
     ]);
   }
 
-  clear() {
+  reset() {
+    schoolController.clear();
     branchController.clear();
     roomController.clear();
 
+    schools.clear();
     branches.clear();
     rooms.clear();
 
+    selectedSchool = "";
     selectedBranch = "";
     selectedRoom = "";
+
+    fetchSchools();
   }
 
   getSchools(BuildContext context) async {

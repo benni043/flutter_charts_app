@@ -4,7 +4,8 @@ import '../utility/Room.dart';
 
 class RoomProvider extends ChangeNotifier {
 
-  Room? room;
+  Room? favouriteRooms;
+  List<Room> currentRooms = [];
 
   RoomProvider();
 }

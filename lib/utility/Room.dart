@@ -22,4 +22,9 @@ class Room {
   set school(String value) {
     _school = value;
   }
+
+  @override
+  String toString() {
+    return 'Room{_school: $_school, _branch: $_branch, _room: $_room}';
+  }
 }
