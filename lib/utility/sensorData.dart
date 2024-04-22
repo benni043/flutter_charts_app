@@ -15,7 +15,7 @@ class SensorData {
     return 'SensorData{time: $time, co2: $co2, humidity: $humidity, temperature: $temperature}';
   }
 
-  static Future<List<SensorData>> readSensorData(String path) async {
+  static Future<List<SensorData>> getSensorDataForADay(String path) async {
     var response = await get(Uri.parse(path));
 
     List<SensorData> sensorDataList = [];
@@ -32,5 +32,63 @@ class SensorData {
     }
 
     return sensorDataList;
+  }
+
+  static getSensorDataForAMonth(String path) async {
+    var response = await get(Uri.parse("$path.json?shallow=true"));
+    Map<String, dynamic> map = jsonDecode(response.body);
+
+    List<SensorData> list = [];
+
+    for (var elem in map.keys) {
+      List<SensorData> data = await getSensorDataForADay("$path/$elem.json");
+
+      int co2Sum = 0;
+      double humiditySum = 0;
+      double tempSum = 0;
+
+      for (var singleData in data) {
+        co2Sum += singleData.co2;
+        humiditySum += singleData.humidity;
+        tempSum += singleData.temperature;
+      }
+
+      SensorData sensorData = SensorData(co2Sum ~/ data.length,
+          humiditySum / data.length, tempSum / data.length, elem);
+
+      list.add(sensorData);
+    }
+
+    return list;
+  }
+
+  static getSensorDataForAYear(String path) async {
+    var response = await get(Uri.parse("$path.json?shallow=true"));
+    Map<String, dynamic> map = jsonDecode(response.body);
+
+    List<SensorData> list = [];
+
+    for (var elem in map.keys) {
+      List<SensorData> data = await getSensorDataForAMonth("$path/$elem");
+
+      int co2Sum = 0;
+      double humiditySum = 0;
+      double tempSum = 0;
+
+      for (var singleData in data) {
+        co2Sum += singleData.co2;
+        humiditySum += singleData.humidity;
+        tempSum += singleData.temperature;
+      }
+
+      SensorData sensorData = SensorData(co2Sum ~/ data.length,
+          humiditySum / data.length, tempSum / data.length, elem);
+
+      list.add(sensorData);
+    }
+
+    print(list);
+
+    return list;
   }
 }
