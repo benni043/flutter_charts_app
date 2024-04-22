@@ -49,7 +49,7 @@ class _SelectRoomState extends State<SelectRoom> {
 
   @override
   Widget build(BuildContext context) {
-    return Row(children: [
+    return Column(children: [
       Padding(
         padding: const EdgeInsets.all(8.0),
         child: DropdownMenu<String>(

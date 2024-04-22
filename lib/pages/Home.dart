@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_charts_app/providers/urlProvider.dart';
 import 'package:flutter_charts_app/utility/sensorData.dart';
 import 'package:flutter_charts_app/widgets/roomDisplay.dart';
 import 'package:flutter_charts_app/widgets/selectRoom.dart';
@@ -21,6 +22,8 @@ class _HomeState extends State<Home> {
     RoomProvider roomProvider =
         Provider.of<RoomProvider>(context, listen: false);
 
+    // SensorData.getSensorDataForADay("https://fluttertestprojectrefr-default-rtdb.europe-west1.firebasedatabase.app/sensorData_2/htl/if/319/2024/04/11");
+
     return Scaffold(
       appBar: AppBar(title: const Text("Hauptansicht"), actions: [
         IconButton(
@@ -36,8 +39,113 @@ class _HomeState extends State<Home> {
             function: setRoomData,
           ),
           for (var room in roomProvider.currentRooms)
-            RoomDisplay(room: room, remove: remove)
+            RoomDisplay(room: room, remove: remove),
+          FutureBuilder(
+            future: getGraphForADay(DateTime(2024, 4, 11)),
+            builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const CircularProgressIndicator();
+              } else if (snapshot.hasError) {
+                return Text('Error: ${snapshot.error}');
+              } else {
+                return Expanded(
+                  child: Container(
+                    padding: const EdgeInsets.all(16.0),
+                    child: snapshot.data as Widget,
+                  ),
+                );
+              }
+            },
+          ),
         ],
+      ),
+    );
+  }
+
+  getGraphForADay(DateTime dateTime) async {
+    UrlProvider urlProvider = Provider.of<UrlProvider>(context, listen: false);
+
+    RoomProvider roomProvider =
+        Provider.of<RoomProvider>(context, listen: false);
+
+    List<List<SensorData>> allLists = [];
+
+    for (var room in roomProvider.currentRooms) {
+      String year = dateTime.year.toString().padLeft(2, '0');
+      String month = dateTime.month.toString().padLeft(2, '0');
+      String day = dateTime.day.toString().padLeft(2, '0');
+
+      List<SensorData> list = await SensorData.getSensorDataForADay(
+          "${urlProvider.url}sensorData_2/${room.school}/${room.branch}/${room.room}/$year/$month/$day.json");
+
+      allLists.add(list);
+    }
+
+    return SfCartesianChart(
+      zoomPanBehavior: ZoomPanBehavior(
+        enablePanning: true, // Panning aktivieren
+        enablePinching: true, // Pinch-Zoom aktivieren
+        zoomMode: ZoomMode.xy, // Zoomen in beiden Richtungen erlauben
+      ),
+      primaryXAxis: const CategoryAxis(),
+      series: <CartesianSeries>[
+        for (int i = 0; i < allLists.length; i++)
+          LineSeries<SensorData, String>(
+            dataSource: allLists[i],
+            xValueMapper: (SensorData data, _) => data.time,
+            yValueMapper: (SensorData data, _) => data.temperature,
+            yAxisName: 'YAxis0',
+            name: 'Series $i', // Optional: Name der Datenreihe
+          ),
+        for (int i = 0; i < allLists.length; i++)
+          LineSeries<SensorData, String>(
+            dataSource: allLists[i],
+            xValueMapper: (SensorData data, _) => data.time,
+            yValueMapper: (SensorData data, _) => data.humidity,
+            yAxisName: 'YAxis1',
+            name: 'Series $i', // Optional: Name der Datenreihe
+          ),
+        for (int i = 0; i < allLists.length; i++)
+          LineSeries<SensorData, String>(
+            dataSource: allLists[i],
+            xValueMapper: (SensorData data, _) => data.time,
+            yValueMapper: (SensorData data, _) => data.co2,
+            yAxisName: 'YAxis2',
+            name: 'Series $i', // Optional: Name der Datenreihe
+          ),
+      ],
+      primaryYAxis: const NumericAxis(isVisible: false),
+      axes: const <ChartAxis>[
+        NumericAxis(
+          name: 'YAxis0',
+          title: AxisTitle(text: 'Temperature'),
+        ),
+        NumericAxis(
+          name: 'YAxis1',
+          title: AxisTitle(text: 'CO2'),
+        ),
+        NumericAxis(
+          name: 'YAxis2',
+          title: AxisTitle(text: 'Humidity'),
+        ),
+      ],
+      tooltipBehavior: TooltipBehavior(
+        enable: true,
+        builder: (dynamic data, dynamic point, dynamic series, int pointIndex, int seriesIndex) {
+          String yAxisName = '';
+          if (seriesIndex == 0) {
+            yAxisName = 'Temperature';
+          } else if (seriesIndex == 1) {
+            yAxisName = 'CO2';
+          } else if (seriesIndex == 2) {
+            yAxisName = 'Humidity';
+          }
+          return Container(
+            padding: const EdgeInsets.all(10),
+            color: Colors.white,
+            child: Text("$yAxisName - ${point.y}"),
+          );
+        },
       ),
     );
   }
