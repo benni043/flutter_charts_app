@@ -18,6 +18,8 @@ class Home extends StatefulWidget {
 
 enum YAxis { co2, temperature, humidity, all }
 
+enum Range { day, week, month, year }
+
 class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
@@ -40,9 +42,9 @@ class _HomeState extends State<Home> {
           ),
           for (var room in roomProvider.currentRooms)
             RoomDisplay(room: room, remove: remove),
-          radioButtons(),
+          graphType(),
           FutureBuilder(
-            future: getGraphForADay(DateTime(2024, 4, 11)),
+            future: getGraphForRange(DateTime(2024, 4, 23), Range.year),
             builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const CircularProgressIndicator();
@@ -65,7 +67,7 @@ class _HomeState extends State<Home> {
 
   YAxis _yAxis = YAxis.co2;
 
-  Widget radioButtons() {
+  Widget graphType() {
     return Column(
       children: [
         ListTile(
@@ -120,7 +122,7 @@ class _HomeState extends State<Home> {
     );
   }
 
-  getGraphForADay(DateTime dateTime) async {
+  getGraphForRange(DateTime dateTime, Range range) async {
     UrlProvider urlProvider = Provider.of<UrlProvider>(context, listen: false);
 
     RoomProvider roomProvider =
@@ -133,12 +135,31 @@ class _HomeState extends State<Home> {
       String month = dateTime.month.toString().padLeft(2, "0");
       String day = dateTime.day.toString().padLeft(2, "0");
 
-      List<SensorData> list = await SensorData.getSensorDataForADay(
-          "${urlProvider.url}sensorData_2/${room.school}/${room.branch}/${room.room}/$year/$month/$day.json");
+      List<SensorData> list;
+
+      switch (range) {
+        case Range.day:
+          {
+            list = await SensorData.getSensorDataForADay(
+                "${urlProvider.url}sensorData_2/${room.school}/${room.branch}/${room.room}/$year/$month/$day.json");
+          }
+        case Range.week:
+        // TODO: Handle this case.
+        case Range.month:
+          list = await SensorData.getSensorDataForAMonth(
+              "${urlProvider.url}sensorData_2/${room.school}/${room.branch}/${room.room}/$year/$month");
+        case Range.year:
+          list = await SensorData.getSensorDataForAYear(
+              "${urlProvider.url}sensorData_2/${room.school}/${room.branch}/${room.room}/$year");
+      }
 
       allLists.add(list);
     }
 
+    return getGraph(allLists);
+  }
+
+  getGraph(List<List<SensorData>> allLists) {
     return SfCartesianChart(
       zoomPanBehavior: ZoomPanBehavior(
         enablePanning: true,
@@ -178,22 +199,23 @@ class _HomeState extends State<Home> {
       primaryYAxis: const NumericAxis(isVisible: false),
       axes: <ChartAxis>[
         // if (_yAxis == YAxis.all || _yAxis == YAxis.temperature)
-          NumericAxis(
-            name: "YAxis0",
-            title: const AxisTitle(text: "Temperature"),
-            opposedPosition: _yAxis == YAxis.temperature ? false : true,
-          ),
+        NumericAxis(
+          name: "YAxis0",
+          title: const AxisTitle(text: "Temperature"),
+          opposedPosition: _yAxis == YAxis.temperature ? false : true,
+        ),
         // if (_yAxis == YAxis.all || _yAxis == YAxis.co2)
-          const NumericAxis(
-            name: "YAxis1",
-            title: AxisTitle(text: "CO2"),
-          ),
+        NumericAxis(
+          name: "YAxis1",
+          title: const AxisTitle(text: "CO2"),
+          opposedPosition: (_yAxis == YAxis.co2 || _yAxis == YAxis.all) ? false : true,
+        ),
         // if (_yAxis == YAxis.all || _yAxis == YAxis.humidity)
-          NumericAxis(
-            name: "YAxis2",
-            title: const AxisTitle(text: "Humidity"),
-            opposedPosition: _yAxis == YAxis.humidity ? false : true,
-          ),
+        NumericAxis(
+          name: "YAxis2",
+          title: const AxisTitle(text: "Humidity"),
+          opposedPosition: _yAxis == YAxis.humidity ? false : true,
+        ),
       ],
       tooltipBehavior: TooltipBehavior(
         enable: true,
