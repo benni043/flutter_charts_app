@@ -62,11 +62,11 @@ class _HomeState extends State<Home> {
     );
   }
 
-  getGraphForADay(DateTime dateTime) async {
+  day(DateTime dateTime) async {
     UrlProvider urlProvider = Provider.of<UrlProvider>(context, listen: false);
 
     RoomProvider roomProvider =
-        Provider.of<RoomProvider>(context, listen: false);
+    Provider.of<RoomProvider>(context, listen: false);
 
     List<List<SensorData>> allLists = [];
 
@@ -80,12 +80,32 @@ class _HomeState extends State<Home> {
 
       allLists.add(list);
     }
+  }
+
+  getGraphForADay() async {
+    UrlProvider urlProvider = Provider.of<UrlProvider>(context, listen: false);
+
+    RoomProvider roomProvider =
+        Provider.of<RoomProvider>(context, listen: false);
+
+    List<List<SensorData>> allLists = [];
+
+    for (var room in roomProvider.currentRooms) {
+      String year = dateTime.year.toString().padLeft(2, '0');
+      String month = dateTime.month.toString().padLeft(2, '0');
+      String day = dateTime.day.toString().padLeft(2, '0');
+
+      List<SensorData> list = await SensorData.getSensorDataForAYear(
+          "${urlProvider.url}sensorData_2/${room.school}/${room.branch}/${room.room}/$year");
+
+      allLists.add(list);
+    }
 
     return SfCartesianChart(
       zoomPanBehavior: ZoomPanBehavior(
-        enablePanning: true, // Panning aktivieren
-        enablePinching: true, // Pinch-Zoom aktivieren
-        zoomMode: ZoomMode.xy, // Zoomen in beiden Richtungen erlauben
+        enablePanning: true,
+        enablePinching: true,
+        zoomMode: ZoomMode.xy,
       ),
       primaryXAxis: const CategoryAxis(),
       series: <CartesianSeries>[
@@ -95,7 +115,7 @@ class _HomeState extends State<Home> {
             xValueMapper: (SensorData data, _) => data.time,
             yValueMapper: (SensorData data, _) => data.temperature,
             yAxisName: 'YAxis0',
-            name: 'Series $i', // Optional: Name der Datenreihe
+            name: 'Series $i',
           ),
         for (int i = 0; i < allLists.length; i++)
           LineSeries<SensorData, String>(
@@ -103,7 +123,7 @@ class _HomeState extends State<Home> {
             xValueMapper: (SensorData data, _) => data.time,
             yValueMapper: (SensorData data, _) => data.humidity,
             yAxisName: 'YAxis1',
-            name: 'Series $i', // Optional: Name der Datenreihe
+            name: 'Series $i',
           ),
         for (int i = 0; i < allLists.length; i++)
           LineSeries<SensorData, String>(
@@ -111,7 +131,7 @@ class _HomeState extends State<Home> {
             xValueMapper: (SensorData data, _) => data.time,
             yValueMapper: (SensorData data, _) => data.co2,
             yAxisName: 'YAxis2',
-            name: 'Series $i', // Optional: Name der Datenreihe
+            name: 'Series $i',
           ),
       ],
       primaryYAxis: const NumericAxis(isVisible: false),
@@ -119,6 +139,7 @@ class _HomeState extends State<Home> {
         NumericAxis(
           name: 'YAxis0',
           title: AxisTitle(text: 'Temperature'),
+          opposedPosition: true,
         ),
         NumericAxis(
           name: 'YAxis1',
@@ -127,6 +148,7 @@ class _HomeState extends State<Home> {
         NumericAxis(
           name: 'YAxis2',
           title: AxisTitle(text: 'Humidity'),
+          opposedPosition: true,
         ),
       ],
       tooltipBehavior: TooltipBehavior(
