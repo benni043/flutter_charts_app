@@ -87,8 +87,6 @@ class SensorData {
       list.add(sensorData);
     }
 
-    print(list);
-
     return list;
   }
 }
