@@ -18,9 +18,26 @@ class Home extends StatefulWidget {
 
 enum YAxis { co2, temperature, humidity, all }
 
-enum Range { day, week, month, year }
+enum Range { day, month, year }
 
 class _HomeState extends State<Home> {
+  @override
+  void initState() {
+    super.initState();
+    String currentFormattedDate = formatDate(DateTime.now());
+    formattedDate = currentFormattedDate;
+    dateInput.text = currentFormattedDate;
+  }
+
+  String formattedDate = "";
+  late DateTime date = DateTime.now();
+
+  TextEditingController dateInput = TextEditingController();
+
+  String formatDate(DateTime date) {
+    return "${date.year}-${date.month}-${date.day}";
+  }
+
   @override
   Widget build(BuildContext context) {
     RoomProvider roomProvider =
@@ -37,6 +54,40 @@ class _HomeState extends State<Home> {
       ]),
       body: Column(
         children: [
+          TextField(
+              controller: dateInput,
+              decoration: const InputDecoration(
+                  icon: Icon(Icons.calendar_today), labelText: "Enter Date"),
+              readOnly: true,
+              onTap: () async {
+                DateTime? pickedDate = await showDatePicker(
+                  context: context,
+                  initialEntryMode: DatePickerEntryMode.calendarOnly,
+                  initialDate: DateTime.now(),
+                  firstDate: DateTime(1999),
+                  lastDate: DateTime.now(),
+                  builder: (context, child) {
+                    return Theme(
+                      data: Theme.of(context).copyWith(
+                          colorScheme: const ColorScheme.light(
+                              primary: Colors.lightBlue,
+                              onBackground: Color.fromRGBO(0, 0, 0, 0.2))),
+                      child: child!,
+                    );
+                  },
+                );
+                if (pickedDate != null) {
+                  formattedDate = formatDate(pickedDate);
+                  date = pickedDate;
+
+                  setState(() {
+                    dateInput.text = formattedDate;
+
+                    // getGraphForRange(pickedDate, _range);
+                  });
+                }
+              }),
+          getRange(),
           SelectRoom(
             function: setRoomData,
           ),
@@ -44,7 +95,7 @@ class _HomeState extends State<Home> {
             RoomDisplay(room: room, remove: remove),
           graphType(),
           FutureBuilder(
-            future: getGraphForRange(DateTime(2024, 4, 23), Range.year),
+            future: getGraphForRange(date, _range),
             builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const CircularProgressIndicator();
@@ -122,6 +173,51 @@ class _HomeState extends State<Home> {
     );
   }
 
+  Range _range = Range.day;
+
+  Widget getRange() {
+    return Column(
+      children: [
+        ListTile(
+          title: const Text("Tag"),
+          leading: Radio<Range>(
+            value: Range.day,
+            groupValue: _range,
+            onChanged: (Range? range) {
+              setState(() {
+                _range = range!;
+              });
+            },
+          ),
+        ),
+        ListTile(
+          title: const Text("Monat"),
+          leading: Radio<Range>(
+            value: Range.month,
+            groupValue: _range,
+            onChanged: (Range? range) {
+              setState(() {
+                _range = range!;
+              });
+            },
+          ),
+        ),
+        ListTile(
+          title: const Text("Jahr"),
+          leading: Radio<Range>(
+            value: Range.year,
+            groupValue: _range,
+            onChanged: (Range? range) {
+              setState(() {
+                _range = range!;
+              });
+            },
+          ),
+        )
+      ],
+    );
+  }
+
   getGraphForRange(DateTime dateTime, Range range) async {
     UrlProvider urlProvider = Provider.of<UrlProvider>(context, listen: false);
 
@@ -137,14 +233,15 @@ class _HomeState extends State<Home> {
 
       List<SensorData> list;
 
+      print(dateTime);
+      print(range);
+
       switch (range) {
         case Range.day:
           {
             list = await SensorData.getSensorDataForADay(
                 "${urlProvider.url}sensorData_2/${room.school}/${room.branch}/${room.room}/$year/$month/$day.json");
           }
-        case Range.week:
-        // TODO: Handle this case.
         case Range.month:
           list = await SensorData.getSensorDataForAMonth(
               "${urlProvider.url}sensorData_2/${room.school}/${room.branch}/${room.room}/$year/$month");
@@ -208,7 +305,8 @@ class _HomeState extends State<Home> {
         NumericAxis(
           name: "YAxis1",
           title: const AxisTitle(text: "CO2"),
-          opposedPosition: (_yAxis == YAxis.co2 || _yAxis == YAxis.all) ? false : true,
+          opposedPosition:
+              (_yAxis == YAxis.co2 || _yAxis == YAxis.all) ? false : true,
         ),
         // if (_yAxis == YAxis.all || _yAxis == YAxis.humidity)
         NumericAxis(
