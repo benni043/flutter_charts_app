@@ -44,14 +44,18 @@ class _HomeState extends State<Home> {
         Provider.of<RoomProvider>(context, listen: false);
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Hauptansicht"), actions: [
-        IconButton(
-            onPressed: () async {
-              await Navigator.pushNamed(context, "/settings");
-              setState(() {});
-            },
-            icon: const Icon(Icons.settings))
-      ]),
+      appBar: AppBar(
+          title: const Text("Hauptansicht"),
+          leading: null,
+          automaticallyImplyLeading: false,
+          actions: [
+            IconButton(
+                onPressed: () async {
+                  await Navigator.pushNamed(context, "/settings");
+                  setState(() {});
+                },
+                icon: const Icon(Icons.settings))
+          ]),
       body: Column(
         children: [
           SelectRoom(

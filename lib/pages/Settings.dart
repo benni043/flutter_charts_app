@@ -26,7 +26,12 @@ class _SettingsState extends State<Settings> {
         Provider.of<RoomProvider>(context, listen: false);
 
     return Scaffold(
-        appBar: AppBar(title: const Text("Einstellungen")),
+        appBar: AppBar(
+            title: const Text("Einstellungen"),
+            leading: IconButton(
+              onPressed: () => {Navigator.pushNamed(context, "/")},
+              icon: const Icon(Icons.arrow_back),
+            )),
         body: Column(
           children: [
             Row(
