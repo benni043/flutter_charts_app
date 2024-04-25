@@ -54,46 +54,13 @@ class _HomeState extends State<Home> {
       ]),
       body: Column(
         children: [
-          TextField(
-              controller: dateInput,
-              decoration: const InputDecoration(
-                  icon: Icon(Icons.calendar_today), labelText: "Enter Date"),
-              readOnly: true,
-              onTap: () async {
-                DateTime? pickedDate = await showDatePicker(
-                  context: context,
-                  initialEntryMode: DatePickerEntryMode.calendarOnly,
-                  initialDate: DateTime.now(),
-                  firstDate: DateTime(1999),
-                  lastDate: DateTime.now(),
-                  builder: (context, child) {
-                    return Theme(
-                      data: Theme.of(context).copyWith(
-                          colorScheme: const ColorScheme.light(
-                              primary: Colors.lightBlue,
-                              onBackground: Color.fromRGBO(0, 0, 0, 0.2))),
-                      child: child!,
-                    );
-                  },
-                );
-                if (pickedDate != null) {
-                  formattedDate = formatDate(pickedDate);
-                  date = pickedDate;
-
-                  setState(() {
-                    dateInput.text = formattedDate;
-
-                    // getGraphForRange(pickedDate, _range);
-                  });
-                }
-              }),
-          getRange(),
           SelectRoom(
             function: setRoomData,
           ),
           for (var room in roomProvider.currentRooms)
             RoomDisplay(room: room, remove: remove),
-          graphType(),
+          datePicker(),
+          getRange(),
           FutureBuilder(
             future: getGraphForRange(date, _range),
             builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
@@ -111,110 +78,182 @@ class _HomeState extends State<Home> {
               }
             },
           ),
+          graphType(),
         ],
       ),
+    );
+  }
+
+  datePicker() {
+    return SizedBox(
+      width: 180,
+      child: TextField(
+          controller: dateInput,
+          decoration: const InputDecoration(
+              icon: Icon(Icons.calendar_today),
+              labelText: "Geben Sie ein Datum an!"),
+          readOnly: true,
+          onTap: () async {
+            DateTime? pickedDate = await showDatePicker(
+              context: context,
+              initialEntryMode: DatePickerEntryMode.calendarOnly,
+              initialDate: DateTime.now(),
+              firstDate: DateTime(1999),
+              lastDate: DateTime.now(),
+              builder: (context, child) {
+                return Theme(
+                  data: Theme.of(context).copyWith(
+                      colorScheme: const ColorScheme.light(
+                          primary: Colors.lightBlue,
+                          onBackground: Color.fromRGBO(0, 0, 0, 0.2))),
+                  child: child!,
+                );
+              },
+            );
+            if (pickedDate != null) {
+              formattedDate = formatDate(pickedDate);
+              date = pickedDate;
+
+              setState(() {
+                dateInput.text = formattedDate;
+              });
+            }
+          }),
     );
   }
 
   YAxis _yAxis = YAxis.co2;
 
   Widget graphType() {
-    return Column(
-      children: [
-        ListTile(
-          title: const Text("CO2"),
-          leading: Radio<YAxis>(
-            value: YAxis.co2,
-            groupValue: _yAxis,
-            onChanged: (YAxis? yAxis) {
-              setState(() {
-                _yAxis = yAxis!;
-              });
-            },
-          ),
+    return Padding(
+      padding: const EdgeInsets.all(10.0),
+      child: SizedBox(
+        width: 600,
+        child: Row(
+          children: [
+            SizedBox(
+              width: 120,
+              child: ListTile(
+                title: const Text("CO2"),
+                leading: Radio<YAxis>(
+                  value: YAxis.co2,
+                  groupValue: _yAxis,
+                  onChanged: (YAxis? yAxis) {
+                    setState(() {
+                      _yAxis = yAxis!;
+                    });
+                  },
+                ),
+              ),
+            ),
+            SizedBox(
+              width: 180,
+              child: ListTile(
+                title: const Text("Temperatur"),
+                leading: Radio<YAxis>(
+                  value: YAxis.temperature,
+                  groupValue: _yAxis,
+                  onChanged: (YAxis? yAxis) {
+                    setState(() {
+                      _yAxis = yAxis!;
+                    });
+                  },
+                ),
+              ),
+            ),
+            SizedBox(
+              width: 160,
+              child: ListTile(
+                title: const Text("Humidity"),
+                leading: Radio<YAxis>(
+                  value: YAxis.humidity,
+                  groupValue: _yAxis,
+                  onChanged: (YAxis? yAxis) {
+                    setState(() {
+                      _yAxis = yAxis!;
+                    });
+                  },
+                ),
+              ),
+            ),
+            SizedBox(
+              width: 120,
+              child: ListTile(
+                title: const Text("Alle"),
+                leading: Radio<YAxis>(
+                  value: YAxis.all,
+                  groupValue: _yAxis,
+                  onChanged: (YAxis? yAxis) {
+                    setState(() {
+                      _yAxis = yAxis!;
+                    });
+                  },
+                ),
+              ),
+            )
+          ],
         ),
-        ListTile(
-          title: const Text("Temperatur"),
-          leading: Radio<YAxis>(
-            value: YAxis.temperature,
-            groupValue: _yAxis,
-            onChanged: (YAxis? yAxis) {
-              setState(() {
-                _yAxis = yAxis!;
-              });
-            },
-          ),
-        ),
-        ListTile(
-          title: const Text("Humidity"),
-          leading: Radio<YAxis>(
-            value: YAxis.humidity,
-            groupValue: _yAxis,
-            onChanged: (YAxis? yAxis) {
-              setState(() {
-                _yAxis = yAxis!;
-              });
-            },
-          ),
-        ),
-        ListTile(
-          title: const Text("Alle"),
-          leading: Radio<YAxis>(
-            value: YAxis.all,
-            groupValue: _yAxis,
-            onChanged: (YAxis? yAxis) {
-              setState(() {
-                _yAxis = yAxis!;
-              });
-            },
-          ),
-        )
-      ],
+      ),
     );
   }
 
   Range _range = Range.day;
 
   Widget getRange() {
-    return Column(
-      children: [
-        ListTile(
-          title: const Text("Tag"),
-          leading: Radio<Range>(
-            value: Range.day,
-            groupValue: _range,
-            onChanged: (Range? range) {
-              setState(() {
-                _range = range!;
-              });
-            },
-          ),
+    return Padding(
+      padding: const EdgeInsets.all(10.0),
+      child: SizedBox(
+        width: 450,
+        child: Row(
+          children: [
+            SizedBox(
+              width: 150,
+              child: ListTile(
+                title: const Text("Tag"),
+                leading: Radio<Range>(
+                  value: Range.day,
+                  groupValue: _range,
+                  onChanged: (Range? range) {
+                    setState(() {
+                      _range = range!;
+                    });
+                  },
+                ),
+              ),
+            ),
+            SizedBox(
+              width: 150,
+              child: ListTile(
+                title: const Text("Monat"),
+                leading: Radio<Range>(
+                  value: Range.month,
+                  groupValue: _range,
+                  onChanged: (Range? range) {
+                    setState(() {
+                      _range = range!;
+                    });
+                  },
+                ),
+              ),
+            ),
+            SizedBox(
+              width: 150,
+              child: ListTile(
+                title: const Text("Jahr"),
+                leading: Radio<Range>(
+                  value: Range.year,
+                  groupValue: _range,
+                  onChanged: (Range? range) {
+                    setState(() {
+                      _range = range!;
+                    });
+                  },
+                ),
+              ),
+            )
+          ],
         ),
-        ListTile(
-          title: const Text("Monat"),
-          leading: Radio<Range>(
-            value: Range.month,
-            groupValue: _range,
-            onChanged: (Range? range) {
-              setState(() {
-                _range = range!;
-              });
-            },
-          ),
-        ),
-        ListTile(
-          title: const Text("Jahr"),
-          leading: Radio<Range>(
-            value: Range.year,
-            groupValue: _range,
-            onChanged: (Range? range) {
-              setState(() {
-                _range = range!;
-              });
-            },
-          ),
-        )
-      ],
+      ),
     );
   }
 
@@ -232,9 +271,6 @@ class _HomeState extends State<Home> {
       String day = dateTime.day.toString().padLeft(2, "0");
 
       List<SensorData> list;
-
-      print(dateTime);
-      print(range);
 
       switch (range) {
         case Range.day:
@@ -257,82 +293,73 @@ class _HomeState extends State<Home> {
   }
 
   getGraph(List<List<SensorData>> allLists) {
-    return SfCartesianChart(
-      zoomPanBehavior: ZoomPanBehavior(
-        enablePanning: true,
-        enablePinching: true,
-        zoomMode: ZoomMode.xy,
-      ),
-      primaryXAxis: const CategoryAxis(),
-      series: <CartesianSeries>[
-        if (_yAxis == YAxis.all || _yAxis == YAxis.temperature)
-          for (int i = 0; i < allLists.length; i++)
-            LineSeries<SensorData, String>(
-              dataSource: allLists[i],
-              xValueMapper: (SensorData data, _) => data.time,
-              yValueMapper: (SensorData data, _) => data.temperature,
-              yAxisName: "YAxis0",
-              name: "Series $i",
+    return Padding(
+      padding: const EdgeInsets.all(20.0),
+      child: SizedBox(
+        width: 1000,
+        child: SfCartesianChart(
+          zoomPanBehavior: ZoomPanBehavior(
+            enablePanning: true,
+            enablePinching: true,
+            zoomMode: ZoomMode.xy,
+          ),
+          primaryXAxis: const CategoryAxis(),
+          series: <CartesianSeries>[
+            if (_yAxis == YAxis.all || _yAxis == YAxis.temperature)
+              for (int i = 0; i < allLists.length; i++)
+                LineSeries<SensorData, String>(
+                  dataSource: allLists[i],
+                  xValueMapper: (SensorData data, _) => data.time,
+                  yValueMapper: (SensorData data, _) => data.temperature,
+                  yAxisName: "YAxis0",
+                  name:
+                      "${allLists[i][0].room.school}/${allLists[i][0].room.branch}/${allLists[i][0].room.room} - Temperature",
+                ),
+            if (_yAxis == YAxis.all || _yAxis == YAxis.humidity)
+              for (int i = 0; i < allLists.length; i++)
+                LineSeries<SensorData, String>(
+                  dataSource: allLists[i],
+                  xValueMapper: (SensorData data, _) => data.time,
+                  yValueMapper: (SensorData data, _) => data.humidity,
+                  yAxisName: "YAxis1",
+                  name:
+                      "${allLists[i][0].room.school}/${allLists[i][0].room.branch}/${allLists[i][0].room.room} - Humidity",
+                ),
+            if (_yAxis == YAxis.all || _yAxis == YAxis.co2)
+              for (int i = 0; i < allLists.length; i++)
+                LineSeries<SensorData, String>(
+                  dataSource: allLists[i],
+                  xValueMapper: (SensorData data, _) => data.time,
+                  yValueMapper: (SensorData data, _) => data.co2,
+                  yAxisName: "YAxis2",
+                  name:
+                      "${allLists[i][0].room.school}/${allLists[i][0].room.branch}/${allLists[i][0].room.room} - CO2",
+                ),
+          ],
+          primaryYAxis: const NumericAxis(isVisible: false),
+          axes: <ChartAxis>[
+            NumericAxis(
+              name: "YAxis0",
+              title: const AxisTitle(text: "Temperature"),
+              opposedPosition: _yAxis == YAxis.temperature ? false : true,
             ),
-        if (_yAxis == YAxis.all || _yAxis == YAxis.humidity)
-          for (int i = 0; i < allLists.length; i++)
-            LineSeries<SensorData, String>(
-              dataSource: allLists[i],
-              xValueMapper: (SensorData data, _) => data.time,
-              yValueMapper: (SensorData data, _) => data.humidity,
-              yAxisName: "YAxis1",
-              name: "Series $i",
+            NumericAxis(
+              name: "YAxis1",
+              title: const AxisTitle(text: "CO2"),
+              opposedPosition:
+                  (_yAxis == YAxis.co2 || _yAxis == YAxis.all) ? false : true,
             ),
-        if (_yAxis == YAxis.all || _yAxis == YAxis.co2)
-          for (int i = 0; i < allLists.length; i++)
-            LineSeries<SensorData, String>(
-              dataSource: allLists[i],
-              xValueMapper: (SensorData data, _) => data.time,
-              yValueMapper: (SensorData data, _) => data.co2,
-              yAxisName: "YAxis2",
-              name: "Series $i",
+            NumericAxis(
+              name: "YAxis2",
+              title: const AxisTitle(text: "Humidity"),
+              opposedPosition: _yAxis == YAxis.humidity ? false : true,
             ),
-      ],
-      primaryYAxis: const NumericAxis(isVisible: false),
-      axes: <ChartAxis>[
-        // if (_yAxis == YAxis.all || _yAxis == YAxis.temperature)
-        NumericAxis(
-          name: "YAxis0",
-          title: const AxisTitle(text: "Temperature"),
-          opposedPosition: _yAxis == YAxis.temperature ? false : true,
+          ],
+          legend: const Legend(isVisible: true),
+          tooltipBehavior: TooltipBehavior(
+            enable: true,
+          ),
         ),
-        // if (_yAxis == YAxis.all || _yAxis == YAxis.co2)
-        NumericAxis(
-          name: "YAxis1",
-          title: const AxisTitle(text: "CO2"),
-          opposedPosition:
-              (_yAxis == YAxis.co2 || _yAxis == YAxis.all) ? false : true,
-        ),
-        // if (_yAxis == YAxis.all || _yAxis == YAxis.humidity)
-        NumericAxis(
-          name: "YAxis2",
-          title: const AxisTitle(text: "Humidity"),
-          opposedPosition: _yAxis == YAxis.humidity ? false : true,
-        ),
-      ],
-      tooltipBehavior: TooltipBehavior(
-        enable: true,
-        builder: (dynamic data, dynamic point, dynamic series, int pointIndex,
-            int seriesIndex) {
-          String yAxisName = "";
-          if (seriesIndex == 0) {
-            yAxisName = "Temperature";
-          } else if (seriesIndex == 1) {
-            yAxisName = "CO2";
-          } else if (seriesIndex == 2) {
-            yAxisName = "Humidity";
-          }
-          return Container(
-            padding: const EdgeInsets.all(10),
-            color: Colors.white,
-            child: Text("$yAxisName - ${point.y}"),
-          );
-        },
       ),
     );
   }

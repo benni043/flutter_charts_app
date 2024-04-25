@@ -49,105 +49,108 @@ class _SelectRoomState extends State<SelectRoom> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(children: [
-      Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: DropdownMenu<String>(
-          initialSelection: selectedSchool,
-          controller: schoolController,
-          requestFocusOnTap: true,
-          label: const Text("Schule"),
-          width: 150,
-          onSelected: (String? school) async {
-            branchController.clear();
-            roomController.clear();
-
-            rooms.clear();
-
-            selectedBranch = "";
-            selectedRoom = "";
-
-            selectedSchool = school;
-            branches = await getBranches(context, selectedSchool!);
-
-            setState(() {});
-          },
-          dropdownMenuEntries:
-              schools.map<DropdownMenuEntry<String>>((String school) {
-            return DropdownMenuEntry<String>(
-              value: school,
-              label: school,
-            );
-          }).toList(),
-        ),
-      ),
-      if (selectedSchool != "")
+    return Container(
+      alignment: Alignment.centerLeft,
+      child: Row(children: [
         Padding(
           padding: const EdgeInsets.all(8.0),
           child: DropdownMenu<String>(
-            initialSelection: selectedBranch,
-            controller: branchController,
+            initialSelection: selectedSchool,
+            controller: schoolController,
             requestFocusOnTap: true,
-            label: const Text("Abteilung"),
+            label: const Text("Schule"),
             width: 150,
-            onSelected: (String? branch) async {
+            onSelected: (String? school) async {
+              branchController.clear();
               roomController.clear();
 
+              rooms.clear();
+
+              selectedBranch = "";
               selectedRoom = "";
 
-              selectedBranch = branch;
-              rooms = await getRooms(context, selectedSchool!, selectedBranch!);
+              selectedSchool = school;
+              branches = await getBranches(context, selectedSchool!);
 
               setState(() {});
             },
             dropdownMenuEntries:
-                branches.map<DropdownMenuEntry<String>>((String branch) {
+                schools.map<DropdownMenuEntry<String>>((String school) {
               return DropdownMenuEntry<String>(
-                value: branch,
-                label: branch,
+                value: school,
+                label: school,
               );
             }).toList(),
           ),
         ),
-      if (selectedBranch != "")
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: DropdownMenu<String>(
-            initialSelection: selectedRoom,
-            controller: roomController,
-            requestFocusOnTap: true,
-            label: const Text("Raum"),
-            width: 150,
-            onSelected: (String? room) {
-              selectedRoom = room;
+        if (selectedSchool != "")
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: DropdownMenu<String>(
+              initialSelection: selectedBranch,
+              controller: branchController,
+              requestFocusOnTap: true,
+              label: const Text("Abteilung"),
+              width: 150,
+              onSelected: (String? branch) async {
+                roomController.clear();
 
-              setState(() {});
-            },
-            dropdownMenuEntries:
-                rooms.map<DropdownMenuEntry<String>>((String room) {
-              return DropdownMenuEntry<String>(
-                value: room,
-                label: room,
-              );
-            }).toList(),
-          ),
-        ),
-      TextButton(
-        onPressed: () {
-          widget.function(Room(selectedSchool!, selectedBranch!, selectedRoom!));
+                selectedRoom = "";
 
-          reset();
-        },
-        style: TextButton.styleFrom(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8.0),
-            side: const BorderSide(color: Colors.black),
+                selectedBranch = branch;
+                rooms = await getRooms(context, selectedSchool!, selectedBranch!);
+
+                setState(() {});
+              },
+              dropdownMenuEntries:
+                  branches.map<DropdownMenuEntry<String>>((String branch) {
+                return DropdownMenuEntry<String>(
+                  value: branch,
+                  label: branch,
+                );
+              }).toList(),
+            ),
           ),
+        if (selectedBranch != "")
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: DropdownMenu<String>(
+              initialSelection: selectedRoom,
+              controller: roomController,
+              requestFocusOnTap: true,
+              label: const Text("Raum"),
+              width: 150,
+              onSelected: (String? room) {
+                selectedRoom = room;
+
+                setState(() {});
+              },
+              dropdownMenuEntries:
+                  rooms.map<DropdownMenuEntry<String>>((String room) {
+                return DropdownMenuEntry<String>(
+                  value: room,
+                  label: room,
+                );
+              }).toList(),
+            ),
+          ),
+        TextButton(
+          onPressed: () {
+            widget
+                .function(Room(selectedSchool!, selectedBranch!, selectedRoom!));
+
+            reset();
+          },
+          style: TextButton.styleFrom(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8.0),
+              side: const BorderSide(color: Colors.black),
+            ),
+          ),
+          child: const Text("Hinzufügen", style: TextStyle(color: Colors.black)),
         ),
-        child:
-        const Text("Hinzufügen", style: TextStyle(color: Colors.black)),
-      ),
-    ]);
+      ]),
+    );
   }
 
   reset() {
